@@ -69,7 +69,7 @@ spc = get_spc_courses()
 matches = {}
 
 print("Cross-checking course lists...")
-for course in spc:
+for course in tqdm(spc):
     if course in fs:
         matches[course] = fs[course]
 
