@@ -1,4 +1,5 @@
-import os, re
+import os, time
+from tkinter import Y
 from tqdm import tqdm
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -47,7 +48,7 @@ def get_spc_courses():
     for row in tqdm(spc_rows):
         code = row.find_element(by=By.TAG_NAME, value="a").text
         if len(code.split(" ")) > 2: continue
-        spc_courses[code] = row.find_element(by=By.CLASS_NAME, value="programCourseTitle").text
+        spc_courses[code.replace(" ", "")] = row.find_element(by=By.CLASS_NAME, value="programCourseTitle").text
 
     spc_url = "https://www.spcollege.edu/future-students/degrees-training/technology/cybersecurity/cybersecurity-bas-degree"
     driver.get(spc_url)
@@ -57,7 +58,7 @@ def get_spc_courses():
     print("Building St. Petersburg College course list (Pt. 2)...")
 
     for row in tqdm(spc_rows):
-        spc_courses[row.find_element(by=By.TAG_NAME, value="a").get_attribute("innerHTML").replace("&", "").replace("nbsp;", "")] = \
+        spc_courses[row.find_element(by=By.TAG_NAME, value="a").get_attribute("innerHTML").replace("&", "").replace("nbsp;", "").replace(" ", "")] = \
             row.get_attribute("innerHTML").split(">")[4].split("<")[0].strip().replace("amp;", "")
 
     return spc_courses
@@ -68,9 +69,13 @@ spc = get_spc_courses()
 matches = {}
 
 print("Cross-checking course lists...")
-for fs_course in tqdm(fs):
-    if fs_course in spc:
-        matches[fs_course] = fs[fs_course]
+for course in spc:
+    if course in fs:
+        matches[course] = fs[course]
 
 print("")
 print(f"Found {len(matches)} matches.")
+
+if len(matches) > 0:
+    for match in matches:
+        print(match, "-", matches[match])
